@@ -1,0 +1,102 @@
+name: Release
+
+# Publishes the provider package to GHCR.
+#
+# Deliberately self-contained rather than delegating to
+# crossplane-contrib/provider-workflows (as the template's
+# publish-provider-package.yml does): that reusable workflow expects
+# XPKG_MIRROR_TOKEN / XPKG_MIRROR_ACCESS_ID secrets which only exist in the
+# crossplane-contrib organisation.
+#
+# Authentication uses the Actions-provided GITHUB_TOKEN, which carries
+# packages:write for the repository's owning organisation. That matters here:
+# this organisation restricts long-lived fine-grained PATs, so publishing from a
+# developer machine is blocked, while publishing from Actions is not.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      # QEMU and Buildx are required because the package is built for both
+      # linux_amd64 and linux_arm64 (see PLATFORMS in the Makefile).
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4
+        with:
+          platforms: all
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
+        with:
+          install: true
+
+      # fetch-depth: 0 is required: the build system derives VERSION from
+      # `git describe --tags`, so a shallow clone would produce v0.0.0.
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: go.mod
+
+      - name: Report Version
+        run: |
+          echo "VERSION=$(make -s build.vars | grep '^VERSION=' | cut -d= -f2)" >> "$GITHUB_ENV"
+          make -s build.vars | grep -E '^(VERSION|PROJECT_NAME|XPKG_REG_ORGS)='
+
+      - name: Vendor Dependencies
+        run: make vendor vendor.check
+
+      # Builds the provider binary, the controller image and the xpkg for every
+      # platform in PLATFORMS. --load is needed because buildx does not load
+      # images into the daemon by default, and the xpkg build reads them from it.
+      - name: Build Artifacts
+        run: make -j2 build.all
+        env:
+          BUILD_ARGS: "--load"
+
+      - name: Login to GHCR
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Pushes the multi-platform package. Invoking the generated per-registry
+      # target directly instead of `make publish`, because `publish` also runs
+      # output.publish, which uploads to an S3 bucket this project does not use.
+      - name: Publish Package
+        run: make xpkg.release.publish.ghcr.io/justtrackio.provider-clickhouse
+
+      - name: Summary
+        run: |
+          {
+            echo "### Published"
+            echo
+            echo '```'
+            echo "ghcr.io/justtrackio/provider-clickhouse:${VERSION}"
+            echo '```'
+            echo
+            echo "Install with:"
+            echo
+            echo '```yaml'
+            echo "apiVersion: pkg.crossplane.io/v1"
+            echo "kind: Provider"
+            echo "metadata:"
+            echo "  name: contrib-provider-clickhouse"
+            echo "spec:"
+            echo "  package: ghcr.io/justtrackio/provider-clickhouse:${VERSION}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
