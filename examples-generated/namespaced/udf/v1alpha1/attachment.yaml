@@ -1,0 +1,18 @@
+apiVersion: udf.clickhouse.m.justtrack.io/v1alpha1
+kind: Attachment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: udf/v1alpha1/attachment
+  labels:
+    testing.upbound.io/example-name: development
+  name: development
+  namespace: crossplane-system
+spec:
+  forProvider:
+    functionNameSelector:
+      matchLabels:
+        testing.upbound.io/example-name: echo_string
+    serviceIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    version: ${clickhouse_udf.echo_string.version}

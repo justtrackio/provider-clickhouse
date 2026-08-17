@@ -10,15 +10,27 @@ package namespaced
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	v1alpha1 "github.com/crossplane/upjet-provider-template/apis/namespaced/null/v1alpha1"
-	v1alpha1namespaced "github.com/crossplane/upjet-provider-template/apis/namespaced/v1alpha1"
-	v1beta1 "github.com/crossplane/upjet-provider-template/apis/namespaced/v1beta1"
+	v1alpha1 "github.com/justtrackio/provider-clickhouse/apis/namespaced/clickpipe/v1alpha1"
+	v1alpha1clickstack "github.com/justtrackio/provider-clickhouse/apis/namespaced/clickstack/v1alpha1"
+	v1alpha1iam "github.com/justtrackio/provider-clickhouse/apis/namespaced/iam/v1alpha1"
+	v1alpha1organization "github.com/justtrackio/provider-clickhouse/apis/namespaced/organization/v1alpha1"
+	v1alpha1postgres "github.com/justtrackio/provider-clickhouse/apis/namespaced/postgres/v1alpha1"
+	v1alpha1service "github.com/justtrackio/provider-clickhouse/apis/namespaced/service/v1alpha1"
+	v1alpha1udf "github.com/justtrackio/provider-clickhouse/apis/namespaced/udf/v1alpha1"
+	v1alpha1namespaced "github.com/justtrackio/provider-clickhouse/apis/namespaced/v1alpha1"
+	v1beta1 "github.com/justtrackio/provider-clickhouse/apis/namespaced/v1beta1"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
 		v1alpha1.SchemeBuilder.AddToScheme,
+		v1alpha1clickstack.SchemeBuilder.AddToScheme,
+		v1alpha1iam.SchemeBuilder.AddToScheme,
+		v1alpha1organization.SchemeBuilder.AddToScheme,
+		v1alpha1postgres.SchemeBuilder.AddToScheme,
+		v1alpha1service.SchemeBuilder.AddToScheme,
+		v1alpha1udf.SchemeBuilder.AddToScheme,
 		v1alpha1namespaced.SchemeBuilder.AddToScheme,
 		v1beta1.SchemeBuilder.AddToScheme,
 	)

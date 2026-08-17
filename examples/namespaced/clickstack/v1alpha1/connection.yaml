@@ -1,0 +1,17 @@
+apiVersion: clickstack.clickhouse.m.justtrack.io/v1alpha1
+kind: Connection
+metadata:
+  annotations:
+    meta.upbound.io/example-id: clickstack/v1alpha1/connection
+  labels:
+    testing.upbound.io/example-name: main
+  name: main
+  namespace: crossplane-system
+spec:
+  forProvider:
+    host: https://clickhouse.example.com:8443
+    name: Production ClickHouse
+    passwordSecretRef:
+      key: example-key
+      name: example-secret
+    username: default

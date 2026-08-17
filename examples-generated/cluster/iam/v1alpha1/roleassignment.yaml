@@ -1,0 +1,18 @@
+apiVersion: iam.clickhouse.justtrack.io/v1alpha1
+kind: RoleAssignment
+metadata:
+  annotations:
+    meta.upbound.io/example-id: iam/v1alpha1/roleassignment
+  labels:
+    testing.upbound.io/example-name: member
+  name: member
+spec:
+  forProvider:
+    apiKeyIds:
+    - ${data.clickhouse_api_key_id.current.id}
+    roleIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: clickhouse_role
+    userIds:
+    - ${data.clickhouse_user.alice.id}
+    - ${data.clickhouse_user.bob.id}

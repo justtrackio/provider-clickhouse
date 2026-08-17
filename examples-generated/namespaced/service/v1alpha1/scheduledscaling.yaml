@@ -1,0 +1,59 @@
+apiVersion: service.clickhouse.m.justtrack.io/v1alpha1
+kind: ScheduledScaling
+metadata:
+  annotations:
+    meta.upbound.io/example-id: service/v1alpha1/scheduledscaling
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+  namespace: crossplane-system
+spec:
+  forProvider:
+    entries:
+    - autoscalingMode: horizontal
+      endHourUtc: 18
+      idleScaling: false
+      maxReplicaMemoryGb: 16
+      maxReplicas: 6
+      minReplicaMemoryGb: 16
+      minReplicas: 3
+      name: Business hours
+      startHourUtc: 8
+      weekdays:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+    - endHourUtc: 6
+      idleScaling: true
+      idleTimeoutMinutes: 5
+      maxReplicas: 1
+      minReplicas: 1
+      name: Overnight
+      startHourUtc: 22
+      weekdays:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+    serviceIdSelector:
+      matchLabels:
+        testing.upbound.io/example-name: svc
+
+---
+
+apiVersion: service.clickhouse.m.justtrack.io/v1alpha1
+kind: Service
+metadata:
+  annotations:
+    meta.upbound.io/example-id: service/v1alpha1/scheduledscaling
+  labels:
+    testing.upbound.io/example-name: svc
+  name: svc
+  namespace: crossplane-system
+spec:
+  forProvider: {}
