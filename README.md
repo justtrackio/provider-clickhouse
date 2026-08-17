@@ -23,7 +23,7 @@ means your observability configuration becomes GitOps-managed alongside everythi
 
 If you have ever rebuilt a HyperDX saved search by hand after someone deleted it, or
 struggled to keep the same set of dashboards across staging and production, this is
-the gap it closes. No other Crossplane provider exposes ClickStack today — see
+the gap it closes. ClickStack support requires a specific execution mode — see
 [why](#why-terraform-cli-mode) for the (fairly interesting) packaging reason.
 
 ## Quickstart
@@ -115,23 +115,6 @@ All 25 upstream resources, in both cluster-scoped and namespaced (Crossplane v2)
 API groups are `<group>.clickhouse.justtrack.io` (cluster-scoped) and
 `<group>.clickhouse.m.justtrack.io` (namespaced).
 
-## Which ClickHouse Crossplane provider should I use?
-
-There is one other Upjet-based option, and it is a reasonable choice for a subset of use
-cases. An honest comparison:
-
-| | justtrackio/provider-clickhouse | [lansweeper-oss/provider-clickhouse](https://github.com/lansweeper-oss/provider-clickhouse) |
-|---|---|---|
-| ClickHouse Cloud resources | ✅ | ✅ |
-| ClickStack / HyperDX resources | ✅ all 9 | ❌ none |
-| Upstream provider version | 3.25.0 | 3.18.1 |
-| Execution mode | Terraform CLI | Plugin Framework (in-process) |
-| Runtime footprint | larger (bundles Terraform) | **smaller and faster** |
-| Namespaced (Crossplane v2) APIs | ✅ | — |
-
-Use theirs if you only need ClickHouse Cloud and want the leaner in-process runtime.
-Use this one if you need ClickStack, newer resources, or Crossplane v2 namespaced APIs.
-
 ## Authentication
 
 The upstream provider serves three surfaces that authenticate differently, and every
@@ -195,10 +178,9 @@ Framework mode. That is forced by upstream packaging rather than chosen:
 
 **No released version has both an importable `pkg/` tree and ClickStack**, so in-process
 Plugin Framework execution is impossible for ClickStack today. CLI mode needs no Go imports
-of the provider, so it supports the full resource set — which is also why the only other
-Upjet ClickHouse provider, pinned to 3.18.1 for Plugin Framework mode, has no ClickStack
-resources. If upstream re-exports a public package tree, switching to
-`WithTerraformPluginFrameworkProvider` would be worthwhile; that is tracked in
+of the provider, so it supports the full resource set. If upstream re-exports a public
+package tree, switching to `WithTerraformPluginFrameworkProvider` would be worthwhile; that
+is tracked in
 [ClickHouse/terraform-provider-clickhouse#661](https://github.com/ClickHouse/terraform-provider-clickhouse/issues/661).
 
 ## Versions
