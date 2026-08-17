@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest a resource, reference or behaviour
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This provider is generated from the official ClickHouse Terraform provider, so the
+        available resources track upstream. If the resource you want does not exist upstream
+        yet, the right place to ask is
+        [ClickHouse/terraform-provider-clickhouse](https://github.com/ClickHouse/terraform-provider-clickhouse/issues)
+        — please link the issue here and we will wire it up once released.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the goal rather than the implementation.
+    validations:
+      required: true
+
+  - type: input
+    id: upstream
+    attributes:
+      label: Upstream Terraform resource or attribute
+      description: If known, the `clickhouse_...` resource or attribute this maps to.
+
+  - type: textarea
+    id: manifest
+    attributes:
+      label: How would you like it to look?
+      description: A sketch of the YAML you would want to write.
+      render: yaml
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround
+      description: How are you handling this today, if at all?

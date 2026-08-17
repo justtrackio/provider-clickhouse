@@ -1,0 +1,16 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Upstream ClickHouse Terraform provider
+    url: https://github.com/ClickHouse/terraform-provider-clickhouse/issues
+    about: >-
+      Missing resources or attributes, and most unexpected apply behaviour, originate
+      upstream. This provider is generated from it.
+  - name: ClickStack / HyperDX
+    url: https://github.com/hyperdxio/hyperdx/issues
+    about: Questions about ClickStack itself, its API or its UI behaviour.
+  - name: Crossplane community Slack
+    url: https://slack.crossplane.io/
+    about: General Crossplane questions, provider installation and package management.
+  - name: Report a security vulnerability
+    url: https://github.com/justtrackio/provider-clickhouse/security/advisories/new
+    about: Please report vulnerabilities privately rather than in a public issue.

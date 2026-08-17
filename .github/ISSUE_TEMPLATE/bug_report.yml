@@ -1,0 +1,73 @@
+name: Bug report
+description: Something does not work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Many surprises come from the upstream ClickHouse Terraform
+        provider rather than this wrapper — the
+        [Caveats](https://github.com/justtrackio/provider-clickhouse#caveats-inherited-from-upstream)
+        section lists the known ones. Please redact any secrets before pasting YAML.
+
+  - type: input
+    id: version
+    attributes:
+      label: Provider package version
+      placeholder: ghcr.io/justtrackio/provider-clickhouse:v0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: resource
+    attributes:
+      label: Kind / upstream Terraform resource
+      description: The Crossplane kind and, if you know it, the upstream resource name.
+      placeholder: clickstack.SavedSearch / clickhouse_clickstack_saved_search
+    validations:
+      required: true
+
+  - type: dropdown
+    id: authmode
+    attributes:
+      label: Authentication mode
+      options:
+        - Self-hosted ClickStack (clickstack_endpoint + clickstack_api_key)
+        - ClickStack on ClickHouse Cloud (Cloud set + clickstack_service_id)
+        - ClickHouse Cloud (organization_id + token_key + token_secret)
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: manifest
+    attributes:
+      label: Managed resource YAML
+      description: The manifest you applied, with secrets redacted.
+      render: yaml
+    validations:
+      required: true
+
+  - type: textarea
+    id: status
+    attributes:
+      label: status.conditions and events
+      description: Output of `kubectl describe` on the managed resource, secrets redacted.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Provider logs
+      description: Relevant lines from the provider pod, secrets redacted.
+      render: shell
