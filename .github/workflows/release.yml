@@ -16,10 +16,16 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to tag and release (e.g. v0.2.0). Leave empty to publish the current ref without tagging.'
+        required: false
+        type: string
 
 permissions:
-  contents: read
+  # contents:write is needed to create the GitHub release for the pushed tag.
+  contents: write
   packages: write
 
 jobs:
@@ -48,6 +54,26 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+
+      # Creating the tag inside this run, rather than in the separate Tag
+      # workflow, is deliberate. That workflow tags with secrets.GITHUB_TOKEN,
+      # and GitHub does not start workflow runs from GITHUB_TOKEN events, so the
+      # resulting tag push would never trigger this workflow and the release
+      # would silently never be published. Tagging here keeps a dispatched
+      # release to a single run with no manual git push.
+      - name: Create Tag
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
+        env:
+          VERSION_INPUT: ${{ github.event.inputs.version }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/${VERSION_INPUT}" >/dev/null; then
+            echo "tag ${VERSION_INPUT} already exists" >&2
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag -a "${VERSION_INPUT}" -m "${VERSION_INPUT}"
+          git push origin "refs/tags/${VERSION_INPUT}"
 
       - name: Setup Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
@@ -82,6 +108,28 @@ jobs:
       # output.publish, which uploads to an S3 bucket this project does not use.
       - name: Publish Package
         run: make xpkg.release.publish.ghcr.io/justtrackio.provider-clickhouse
+
+      # Creates the GitHub release for the tag this run published, so a release
+      # never has to be published by hand. Skipped for a dispatch without a
+      # version, where the ref is a branch and VERSION is a `git describe` value
+      # with no matching tag.
+      #
+      # Uses the preinstalled gh CLI rather than a third-party action: it needs
+      # no digest pinning and no additional dependency to keep updated. The run
+      # is idempotent so re-running a release does not fail on an existing one.
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${VERSION}" >/dev/null 2>&1; then
+            echo "release ${VERSION} already exists, leaving it untouched"
+          else
+            gh release create "${VERSION}" \
+              --title "${VERSION}" \
+              --generate-notes \
+              --verify-tag
+          fi
 
       - name: Summary
         run: |
