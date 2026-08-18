@@ -217,17 +217,30 @@ func configureClickStack(p *ujconfig.Provider) {
 		r.Kind = "Source"
 		r.References["connection_id"] = ujconfig.Reference{TerraformName: resCSConnection}
 		r.References["team"] = teamRef()
-		// Sources cross-reference each other so a trace view can jump to the
-		// correlated logs, and so on. Without these, the only way to express
-		// the link is to paste the peer's server-assigned ObjectID into the
-		// spec, which defeats managing the sources declaratively: the IDs
-		// differ per environment and are not known until the peer is created.
-		// Every one of these points at another Source, including the
-		// self-referential case (a log source naming its own trace source).
-		r.References["log_source_id"] = ujconfig.Reference{TerraformName: resCSSource}
-		r.References["trace_source_id"] = ujconfig.Reference{TerraformName: resCSSource}
-		r.References["metric_source_id"] = ujconfig.Reference{TerraformName: resCSSource}
-		r.References["session_source_id"] = ujconfig.Reference{TerraformName: resCSSource}
+		// The peer links (log/trace/metric/session_source_id) are deliberately
+		// not references, and are ignored by the late-initializer.
+		//
+		// ClickStack keeps a different set of fields per source kind and drops
+		// the rest without saying so: a log source keeps its trace and metric
+		// link but discards the session one, a metric source discards its trace
+		// link. Terraform compares what it sent with what came back, so a
+		// discarded link fails the apply ("produced an unexpected new value:
+		// .session_source_id ... but now null") and the reconciler retries for
+		// ever. Resolving a reference writes the peer's ID into the spec, the
+		// API drops it, the next reconcile resolves and writes it again: sdlc
+		// sat at 270 spec writes a minute on its session source, which surfaced
+		// in Argo CD as a resource flapping in and out of sync. Sources whose
+		// links happened to survive the round trip stayed still, which is what
+		// gave the loop away.
+		//
+		// Until ClickStack persists these, correlate sources through the
+		// application that seeds them rather than through this provider.
+		r.LateInitializer.IgnoredFields = []string{
+			"log_source_id",
+			"trace_source_id",
+			"metric_source_id",
+			"session_source_id",
+		}
 	})
 
 	p.AddResourceConfigurator(resCSSavedSearch, func(r *ujconfig.Resource) {
