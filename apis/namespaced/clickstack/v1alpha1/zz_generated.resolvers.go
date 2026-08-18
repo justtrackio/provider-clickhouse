@@ -276,6 +276,57 @@ func (mg *Source) ResolveReferences(ctx context.Context, c client.Reader) error 
 	mg.Spec.ForProvider.ConnectionIDRef = rsp.ResolvedReference
 
 	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.LogSourceID),
+		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
+		Reference:    mg.Spec.ForProvider.LogSourceIDRef,
+		Selector:     mg.Spec.ForProvider.LogSourceIDSelector,
+		To: reference.To{
+			List:    &SourceList{},
+			Managed: &Source{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.LogSourceID")
+	}
+	mg.Spec.ForProvider.LogSourceID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.LogSourceIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.MetricSourceID),
+		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
+		Reference:    mg.Spec.ForProvider.MetricSourceIDRef,
+		Selector:     mg.Spec.ForProvider.MetricSourceIDSelector,
+		To: reference.To{
+			List:    &SourceList{},
+			Managed: &Source{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.MetricSourceID")
+	}
+	mg.Spec.ForProvider.MetricSourceID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.MetricSourceIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.SessionSourceID),
+		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
+		Reference:    mg.Spec.ForProvider.SessionSourceIDRef,
+		Selector:     mg.Spec.ForProvider.SessionSourceIDSelector,
+		To: reference.To{
+			List:    &SourceList{},
+			Managed: &Source{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.SessionSourceID")
+	}
+	mg.Spec.ForProvider.SessionSourceID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.SessionSourceIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Team),
 		Extract:      reference.ExternalName(),
 		Namespace:    mg.GetNamespace(),
@@ -291,6 +342,23 @@ func (mg *Source) ResolveReferences(ctx context.Context, c client.Reader) error 
 	}
 	mg.Spec.ForProvider.Team = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.TeamRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.TraceSourceID),
+		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
+		Reference:    mg.Spec.ForProvider.TraceSourceIDRef,
+		Selector:     mg.Spec.ForProvider.TraceSourceIDSelector,
+		To: reference.To{
+			List:    &SourceList{},
+			Managed: &Source{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.TraceSourceID")
+	}
+	mg.Spec.ForProvider.TraceSourceID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.TraceSourceIDRef = rsp.ResolvedReference
 
 	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.ConnectionID),
@@ -310,6 +378,57 @@ func (mg *Source) ResolveReferences(ctx context.Context, c client.Reader) error 
 	mg.Spec.InitProvider.ConnectionIDRef = rsp.ResolvedReference
 
 	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.LogSourceID),
+		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
+		Reference:    mg.Spec.InitProvider.LogSourceIDRef,
+		Selector:     mg.Spec.InitProvider.LogSourceIDSelector,
+		To: reference.To{
+			List:    &SourceList{},
+			Managed: &Source{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.LogSourceID")
+	}
+	mg.Spec.InitProvider.LogSourceID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.LogSourceIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.MetricSourceID),
+		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
+		Reference:    mg.Spec.InitProvider.MetricSourceIDRef,
+		Selector:     mg.Spec.InitProvider.MetricSourceIDSelector,
+		To: reference.To{
+			List:    &SourceList{},
+			Managed: &Source{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.MetricSourceID")
+	}
+	mg.Spec.InitProvider.MetricSourceID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.MetricSourceIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.SessionSourceID),
+		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
+		Reference:    mg.Spec.InitProvider.SessionSourceIDRef,
+		Selector:     mg.Spec.InitProvider.SessionSourceIDSelector,
+		To: reference.To{
+			List:    &SourceList{},
+			Managed: &Source{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.SessionSourceID")
+	}
+	mg.Spec.InitProvider.SessionSourceID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.SessionSourceIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.Team),
 		Extract:      reference.ExternalName(),
 		Namespace:    mg.GetNamespace(),
@@ -325,6 +444,23 @@ func (mg *Source) ResolveReferences(ctx context.Context, c client.Reader) error 
 	}
 	mg.Spec.InitProvider.Team = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.InitProvider.TeamRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.InitProvider.TraceSourceID),
+		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
+		Reference:    mg.Spec.InitProvider.TraceSourceIDRef,
+		Selector:     mg.Spec.InitProvider.TraceSourceIDSelector,
+		To: reference.To{
+			List:    &SourceList{},
+			Managed: &Source{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.InitProvider.TraceSourceID")
+	}
+	mg.Spec.InitProvider.TraceSourceID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.InitProvider.TraceSourceIDRef = rsp.ResolvedReference
 
 	return nil
 }

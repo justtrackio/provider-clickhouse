@@ -2550,6 +2550,16 @@ func (in *SourceInitParameters) DeepCopyInto(out *SourceInitParameters) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.LogSourceIDRef != nil {
+		in, out := &in.LogSourceIDRef, &out.LogSourceIDRef
+		*out = new(v2.Reference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.LogSourceIDSelector != nil {
+		in, out := &in.LogSourceIDSelector, &out.LogSourceIDSelector
+		*out = new(v2.Selector)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.MaterializedViews != nil {
 		in, out := &in.MaterializedViews, &out.MaterializedViews
 		*out = make([]MaterializedViewsInitParameters, len(*in))
@@ -2566,6 +2576,16 @@ func (in *SourceInitParameters) DeepCopyInto(out *SourceInitParameters) {
 		in, out := &in.MetricSourceID, &out.MetricSourceID
 		*out = new(string)
 		**out = **in
+	}
+	if in.MetricSourceIDRef != nil {
+		in, out := &in.MetricSourceIDRef, &out.MetricSourceIDRef
+		*out = new(v2.Reference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.MetricSourceIDSelector != nil {
+		in, out := &in.MetricSourceIDSelector, &out.MetricSourceIDSelector
+		*out = new(v2.Selector)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.MetricTables != nil {
 		in, out := &in.MetricTables, &out.MetricTables
@@ -2618,6 +2638,16 @@ func (in *SourceInitParameters) DeepCopyInto(out *SourceInitParameters) {
 		in, out := &in.SessionSourceID, &out.SessionSourceID
 		*out = new(string)
 		**out = **in
+	}
+	if in.SessionSourceIDRef != nil {
+		in, out := &in.SessionSourceIDRef, &out.SessionSourceIDRef
+		*out = new(v2.Reference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.SessionSourceIDSelector != nil {
+		in, out := &in.SessionSourceIDSelector, &out.SessionSourceIDSelector
+		*out = new(v2.Selector)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.SeverityTextExpression != nil {
 		in, out := &in.SeverityTextExpression, &out.SeverityTextExpression
@@ -2683,6 +2713,16 @@ func (in *SourceInitParameters) DeepCopyInto(out *SourceInitParameters) {
 		in, out := &in.TraceSourceID, &out.TraceSourceID
 		*out = new(string)
 		**out = **in
+	}
+	if in.TraceSourceIDRef != nil {
+		in, out := &in.TraceSourceIDRef, &out.TraceSourceIDRef
+		*out = new(v2.Reference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.TraceSourceIDSelector != nil {
+		in, out := &in.TraceSourceIDSelector, &out.TraceSourceIDSelector
+		*out = new(v2.Selector)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.UseTextIndexForImplicitColumn != nil {
 		in, out := &in.UseTextIndexForImplicitColumn, &out.UseTextIndexForImplicitColumn
@@ -3053,6 +3093,16 @@ func (in *SourceParameters) DeepCopyInto(out *SourceParameters) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.LogSourceIDRef != nil {
+		in, out := &in.LogSourceIDRef, &out.LogSourceIDRef
+		*out = new(v2.Reference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.LogSourceIDSelector != nil {
+		in, out := &in.LogSourceIDSelector, &out.LogSourceIDSelector
+		*out = new(v2.Selector)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.MaterializedViews != nil {
 		in, out := &in.MaterializedViews, &out.MaterializedViews
 		*out = make([]MaterializedViewsParameters, len(*in))
@@ -3069,6 +3119,16 @@ func (in *SourceParameters) DeepCopyInto(out *SourceParameters) {
 		in, out := &in.MetricSourceID, &out.MetricSourceID
 		*out = new(string)
 		**out = **in
+	}
+	if in.MetricSourceIDRef != nil {
+		in, out := &in.MetricSourceIDRef, &out.MetricSourceIDRef
+		*out = new(v2.Reference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.MetricSourceIDSelector != nil {
+		in, out := &in.MetricSourceIDSelector, &out.MetricSourceIDSelector
+		*out = new(v2.Selector)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.MetricTables != nil {
 		in, out := &in.MetricTables, &out.MetricTables
@@ -3121,6 +3181,16 @@ func (in *SourceParameters) DeepCopyInto(out *SourceParameters) {
 		in, out := &in.SessionSourceID, &out.SessionSourceID
 		*out = new(string)
 		**out = **in
+	}
+	if in.SessionSourceIDRef != nil {
+		in, out := &in.SessionSourceIDRef, &out.SessionSourceIDRef
+		*out = new(v2.Reference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.SessionSourceIDSelector != nil {
+		in, out := &in.SessionSourceIDSelector, &out.SessionSourceIDSelector
+		*out = new(v2.Selector)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.SeverityTextExpression != nil {
 		in, out := &in.SeverityTextExpression, &out.SeverityTextExpression
@@ -3186,6 +3256,16 @@ func (in *SourceParameters) DeepCopyInto(out *SourceParameters) {
 		in, out := &in.TraceSourceID, &out.TraceSourceID
 		*out = new(string)
 		**out = **in
+	}
+	if in.TraceSourceIDRef != nil {
+		in, out := &in.TraceSourceIDRef, &out.TraceSourceIDRef
+		*out = new(v2.Reference)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.TraceSourceIDSelector != nil {
+		in, out := &in.TraceSourceIDSelector, &out.TraceSourceIDSelector
+		*out = new(v2.Selector)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.UseTextIndexForImplicitColumn != nil {
 		in, out := &in.UseTextIndexForImplicitColumn, &out.UseTextIndexForImplicitColumn
