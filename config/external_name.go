@@ -1,8 +1,60 @@
 package config
 
 import (
+	"context"
+
 	"github.com/crossplane/upjet/v2/pkg/config"
 )
+
+// unusedObjectID is a syntactically valid Mongo ObjectID that no ClickStack
+// object can have: ObjectIDs embed a creation timestamp in their first four
+// bytes, so an all-zero value would mean "created at the Unix epoch". The API
+// still accepts it as a well-formed id and answers a lookup with 404, which is
+// exactly what clickStackIdentifier needs below.
+const unusedObjectID = "000000000000000000000000"
+
+// clickStackIdentifier is config.IdentifierFromProvider for ClickStack
+// resources, with a single deviation: a resource that has not been created yet
+// gets unusedObjectID as its Terraform id instead of an empty string.
+//
+// Upjet seeds terraform.tfstate for every managed resource before it runs
+// Terraform, taking the state's `id` from GetIDFn (see upjet
+// pkg/terraform/store.go, which calls FileProducer.EnsureTFState with the
+// result of GetIDFn; EnsureTFState writes the entry unconditionally and has no
+// empty-id guard). A resource that does not exist yet has no external name, so
+// with plain IdentifierFromProvider the seeded id is "" and the refresh that
+// follows reads an empty id.
+//
+// That is where the ClickStack API surface turns a harmless no-op into a
+// deadlock. The upstream client builds "<collection>/<id>", which for an empty
+// id collapses to the collection path with a trailing slash, and HyperDX
+// serves that as the collection itself - HTTP 200 with a JSON array - instead
+// of 404. Decoding an array into the single-object response envelope then
+// fails:
+//
+//	Error Reading Saved Search: decode saved search: json: cannot unmarshal
+//	array into Go struct field savedSearchEnvelope.data of type
+//	client.SavedSearch
+//
+// Observe never succeeds, so Crossplane never advances to Create, so an
+// external name is never assigned and the next reconcile repeats the same
+// refresh. Handing Terraform an id that cannot exist makes that refresh a
+// clean 404, which the client maps to its not-found error; Terraform drops the
+// resource from state and the resource is created normally.
+//
+// Once created, behaviour is identical to IdentifierFromProvider: the external
+// name is read back from the state id, and every later refresh uses the real
+// ObjectID.
+func clickStackIdentifier() config.ExternalName {
+	e := config.IdentifierFromProvider
+	e.GetIDFn = func(ctx context.Context, externalName string, parameters map[string]any, terraformProviderConfig map[string]any) (string, error) {
+		if externalName == "" {
+			return unusedObjectID, nil
+		}
+		return config.ExternalNameAsID(ctx, externalName, parameters, terraformProviderConfig)
+	}
+	return e
+}
 
 // ExternalNameConfigs contains all external name configurations for this
 // provider.
@@ -85,35 +137,40 @@ var ExternalNameConfigs = map[string]config.ExternalName{
 	//
 	// Every ClickStack resource exposes a read-only `id` (a Mongo ObjectID
 	// such as 507f1f77bcf86cd799439011 on self-hosted deployments), so all
-	// of them take the id from the provider.
+	// of them take the id from the provider. They use
+	// clickStackIdentifier rather than config.IdentifierFromProvider
+	// directly so that a not-yet-created resource refreshes against an
+	// unused id instead of an empty one - see clickStackIdentifier for why
+	// an empty id wedges these resources.
 	//
 	// Note on teams: these resources accept an optional `team` argument, and
 	// their documented import syntax allows a `<team-id>/<id>` prefix for
 	// multi-team (EE) deployments. That prefix is an import-time convenience
 	// handled inside the upstream provider; the value stored in `id` remains
 	// the bare resource id, and `team` stays a normal spec field. So
-	// IdentifierFromProvider is correct here and no template is needed.
+	// taking the identifier from the provider is correct here and no
+	// template is needed.
 	//
 	// `team` is immutable on these resources upstream - see the
 	// clickstack group configuration where it is marked as forcing
 	// replacement.
-	"clickhouse_clickstack_alert":        config.IdentifierFromProvider,
-	"clickhouse_clickstack_dashboard":    config.IdentifierFromProvider,
-	"clickhouse_clickstack_saved_search": config.IdentifierFromProvider,
-	"clickhouse_clickstack_source":       config.IdentifierFromProvider,
-	"clickhouse_clickstack_webhook":      config.IdentifierFromProvider,
+	"clickhouse_clickstack_alert":        clickStackIdentifier(),
+	"clickhouse_clickstack_dashboard":    clickStackIdentifier(),
+	"clickhouse_clickstack_saved_search": clickStackIdentifier(),
+	"clickhouse_clickstack_source":       clickStackIdentifier(),
+	"clickhouse_clickstack_webhook":      clickStackIdentifier(),
 
 	// Self-hosted ClickStack only. On ClickHouse Cloud, roles/teams/members
 	// are managed through clickhouse_role and clickhouse_role_assignment
 	// instead, and these endpoints return route-not-found.
-	"clickhouse_clickstack_role":        config.IdentifierFromProvider,
-	"clickhouse_clickstack_team":        config.IdentifierFromProvider,
-	"clickhouse_clickstack_team_member": config.IdentifierFromProvider,
+	"clickhouse_clickstack_role":        clickStackIdentifier(),
+	"clickhouse_clickstack_team":        clickStackIdentifier(),
+	"clickhouse_clickstack_team_member": clickStackIdentifier(),
 
 	// Read-only in practice: the platform provisions connections, so an
 	// imported connection can be read but not updated or destroyed. Users
 	// should pair this with a management policy of ["Observe"].
-	"clickhouse_clickstack_connection": config.IdentifierFromProvider,
+	"clickhouse_clickstack_connection": clickStackIdentifier(),
 }
 
 // ExternalNameConfigured returns the list of all resources whose external name
