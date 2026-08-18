@@ -118,6 +118,10 @@ func (tr *Source) LateInitialize(attrs []byte) (bool, error) {
 		return false, errors.Wrap(err, "failed to unmarshal Terraform state parameters for late-initialization")
 	}
 	opts := []resource.GenericLateInitializerOption{resource.WithZeroValueJSONOmitEmptyFilter(resource.CNameWildcard)}
+	opts = append(opts, resource.WithNameFilter("LogSourceID"))
+	opts = append(opts, resource.WithNameFilter("MetricSourceID"))
+	opts = append(opts, resource.WithNameFilter("SessionSourceID"))
+	opts = append(opts, resource.WithNameFilter("TraceSourceID"))
 
 	li := resource.NewGenericLateInitializer(opts...)
 	return li.LateInitialize(&tr.Spec.ForProvider, params)
