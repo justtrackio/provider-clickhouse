@@ -217,6 +217,17 @@ func configureClickStack(p *ujconfig.Provider) {
 		r.Kind = "Source"
 		r.References["connection_id"] = ujconfig.Reference{TerraformName: resCSConnection}
 		r.References["team"] = teamRef()
+		// Sources cross-reference each other so a trace view can jump to the
+		// correlated logs, and so on. Without these, the only way to express
+		// the link is to paste the peer's server-assigned ObjectID into the
+		// spec, which defeats managing the sources declaratively: the IDs
+		// differ per environment and are not known until the peer is created.
+		// Every one of these points at another Source, including the
+		// self-referential case (a log source naming its own trace source).
+		r.References["log_source_id"] = ujconfig.Reference{TerraformName: resCSSource}
+		r.References["trace_source_id"] = ujconfig.Reference{TerraformName: resCSSource}
+		r.References["metric_source_id"] = ujconfig.Reference{TerraformName: resCSSource}
+		r.References["session_source_id"] = ujconfig.Reference{TerraformName: resCSSource}
 	})
 
 	p.AddResourceConfigurator(resCSSavedSearch, func(r *ujconfig.Resource) {

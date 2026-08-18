@@ -512,7 +512,16 @@ type SourceInitParameters struct {
 
 	// (String) Correlated log source ID.
 	// Correlated log source ID.
+	// +crossplane:generate:reference:type=github.com/justtrackio/provider-clickhouse/apis/cluster/clickstack/v1alpha1.Source
 	LogSourceID *string `json:"logSourceId,omitempty" tf:"log_source_id,omitempty"`
+
+	// Reference to a Source in clickstack to populate logSourceId.
+	// +kubebuilder:validation:Optional
+	LogSourceIDRef *v2.Reference `json:"logSourceIdRef,omitempty" tf:"-"`
+
+	// Selector for a Source in clickstack to populate logSourceId.
+	// +kubebuilder:validation:Optional
+	LogSourceIDSelector *v2.Selector `json:"logSourceIdSelector,omitempty" tf:"-"`
 
 	// (Attributes List) Materialized views for query optimization (log, trace). (see below for nested schema)
 	MaterializedViews []MaterializedViewsInitParameters `json:"materializedViews,omitempty" tf:"materialized_views,omitempty"`
@@ -522,7 +531,16 @@ type SourceInitParameters struct {
 
 	// (String) Correlated metric source ID.
 	// Correlated metric source ID.
+	// +crossplane:generate:reference:type=github.com/justtrackio/provider-clickhouse/apis/cluster/clickstack/v1alpha1.Source
 	MetricSourceID *string `json:"metricSourceId,omitempty" tf:"metric_source_id,omitempty"`
+
+	// Reference to a Source in clickstack to populate metricSourceId.
+	// +kubebuilder:validation:Optional
+	MetricSourceIDRef *v2.Reference `json:"metricSourceIdRef,omitempty" tf:"-"`
+
+	// Selector for a Source in clickstack to populate metricSourceId.
+	// +kubebuilder:validation:Optional
+	MetricSourceIDSelector *v2.Selector `json:"metricSourceIdSelector,omitempty" tf:"-"`
 
 	// (Attributes) Mapping of metric data types to table names (metric). At least one must be set. (see below for nested schema)
 	MetricTables *MetricTablesInitParameters `json:"metricTables,omitempty" tf:"metric_tables,omitempty"`
@@ -560,7 +578,16 @@ type SourceInitParameters struct {
 
 	// (String) Correlated session source ID (trace).
 	// Correlated session source ID (trace).
+	// +crossplane:generate:reference:type=github.com/justtrackio/provider-clickhouse/apis/cluster/clickstack/v1alpha1.Source
 	SessionSourceID *string `json:"sessionSourceId,omitempty" tf:"session_source_id,omitempty"`
+
+	// Reference to a Source in clickstack to populate sessionSourceId.
+	// +kubebuilder:validation:Optional
+	SessionSourceIDRef *v2.Reference `json:"sessionSourceIdRef,omitempty" tf:"-"`
+
+	// Selector for a Source in clickstack to populate sessionSourceId.
+	// +kubebuilder:validation:Optional
+	SessionSourceIDSelector *v2.Selector `json:"sessionSourceIdSelector,omitempty" tf:"-"`
 
 	// (String) Expression to extract the severity/log level text (log).
 	// Expression to extract the severity/log level text (log).
@@ -613,7 +640,16 @@ type SourceInitParameters struct {
 
 	// (String) Correlated trace source ID. Required for session.
 	// Correlated trace source ID. Required for `session`.
+	// +crossplane:generate:reference:type=github.com/justtrackio/provider-clickhouse/apis/cluster/clickstack/v1alpha1.Source
 	TraceSourceID *string `json:"traceSourceId,omitempty" tf:"trace_source_id,omitempty"`
+
+	// Reference to a Source in clickstack to populate traceSourceId.
+	// +kubebuilder:validation:Optional
+	TraceSourceIDRef *v2.Reference `json:"traceSourceIdRef,omitempty" tf:"-"`
+
+	// Selector for a Source in clickstack to populate traceSourceId.
+	// +kubebuilder:validation:Optional
+	TraceSourceIDSelector *v2.Selector `json:"traceSourceIdSelector,omitempty" tf:"-"`
 
 	// (String) Whether to use ClickHouse text indices for the implicit column: auto, enabled, or disabled.
 	// Whether to use ClickHouse text indices for the implicit column: `auto`, `enabled`, or `disabled`.
@@ -859,8 +895,17 @@ type SourceParameters struct {
 
 	// (String) Correlated log source ID.
 	// Correlated log source ID.
+	// +crossplane:generate:reference:type=github.com/justtrackio/provider-clickhouse/apis/cluster/clickstack/v1alpha1.Source
 	// +kubebuilder:validation:Optional
 	LogSourceID *string `json:"logSourceId,omitempty" tf:"log_source_id,omitempty"`
+
+	// Reference to a Source in clickstack to populate logSourceId.
+	// +kubebuilder:validation:Optional
+	LogSourceIDRef *v2.Reference `json:"logSourceIdRef,omitempty" tf:"-"`
+
+	// Selector for a Source in clickstack to populate logSourceId.
+	// +kubebuilder:validation:Optional
+	LogSourceIDSelector *v2.Selector `json:"logSourceIdSelector,omitempty" tf:"-"`
 
 	// (Attributes List) Materialized views for query optimization (log, trace). (see below for nested schema)
 	// +kubebuilder:validation:Optional
@@ -872,8 +917,17 @@ type SourceParameters struct {
 
 	// (String) Correlated metric source ID.
 	// Correlated metric source ID.
+	// +crossplane:generate:reference:type=github.com/justtrackio/provider-clickhouse/apis/cluster/clickstack/v1alpha1.Source
 	// +kubebuilder:validation:Optional
 	MetricSourceID *string `json:"metricSourceId,omitempty" tf:"metric_source_id,omitempty"`
+
+	// Reference to a Source in clickstack to populate metricSourceId.
+	// +kubebuilder:validation:Optional
+	MetricSourceIDRef *v2.Reference `json:"metricSourceIdRef,omitempty" tf:"-"`
+
+	// Selector for a Source in clickstack to populate metricSourceId.
+	// +kubebuilder:validation:Optional
+	MetricSourceIDSelector *v2.Selector `json:"metricSourceIdSelector,omitempty" tf:"-"`
 
 	// (Attributes) Mapping of metric data types to table names (metric). At least one must be set. (see below for nested schema)
 	// +kubebuilder:validation:Optional
@@ -920,8 +974,17 @@ type SourceParameters struct {
 
 	// (String) Correlated session source ID (trace).
 	// Correlated session source ID (trace).
+	// +crossplane:generate:reference:type=github.com/justtrackio/provider-clickhouse/apis/cluster/clickstack/v1alpha1.Source
 	// +kubebuilder:validation:Optional
 	SessionSourceID *string `json:"sessionSourceId,omitempty" tf:"session_source_id,omitempty"`
+
+	// Reference to a Source in clickstack to populate sessionSourceId.
+	// +kubebuilder:validation:Optional
+	SessionSourceIDRef *v2.Reference `json:"sessionSourceIdRef,omitempty" tf:"-"`
+
+	// Selector for a Source in clickstack to populate sessionSourceId.
+	// +kubebuilder:validation:Optional
+	SessionSourceIDSelector *v2.Selector `json:"sessionSourceIdSelector,omitempty" tf:"-"`
 
 	// (String) Expression to extract the severity/log level text (log).
 	// Expression to extract the severity/log level text (log).
@@ -984,8 +1047,17 @@ type SourceParameters struct {
 
 	// (String) Correlated trace source ID. Required for session.
 	// Correlated trace source ID. Required for `session`.
+	// +crossplane:generate:reference:type=github.com/justtrackio/provider-clickhouse/apis/cluster/clickstack/v1alpha1.Source
 	// +kubebuilder:validation:Optional
 	TraceSourceID *string `json:"traceSourceId,omitempty" tf:"trace_source_id,omitempty"`
+
+	// Reference to a Source in clickstack to populate traceSourceId.
+	// +kubebuilder:validation:Optional
+	TraceSourceIDRef *v2.Reference `json:"traceSourceIdRef,omitempty" tf:"-"`
+
+	// Selector for a Source in clickstack to populate traceSourceId.
+	// +kubebuilder:validation:Optional
+	TraceSourceIDSelector *v2.Selector `json:"traceSourceIdSelector,omitempty" tf:"-"`
 
 	// (String) Whether to use ClickHouse text indices for the implicit column: auto, enabled, or disabled.
 	// Whether to use ClickHouse text indices for the implicit column: `auto`, `enabled`, or `disabled`.
