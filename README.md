@@ -132,6 +132,53 @@ rather than failing opaquely on every managed resource.
 mode: `api_url`, `timeout_seconds` (integer). Supplying only one set is valid; resources
 belonging to the other surface will then error if used.
 
+## Adopting existing ClickStack objects
+
+ClickStack objects are identified only by a server-assigned Mongo ObjectID. There is no
+name-based lookup upstream, and the documented `terraform import` syntax is the bare id, so
+`crossplane.io/external-name` must be that ObjectID. Point a manifest at an estate that was
+built in the UI — or that the platform pre-provisioned — and every object it describes is
+created a second time under a new id, rather than adopted.
+
+Set `clickstack_adopt_by_name` in the `ProviderConfig` secret to close that gap:
+
+```json
+{
+  "clickstack_endpoint": "http://hyperdx.observability.svc.cluster.local:8000",
+  "clickstack_api_key": "REPLACE_ME",
+  "clickstack_adopt_by_name": "true"
+}
+```
+
+A resource that has no external name yet then asks the API whether an object of the same
+`forProvider.name` already exists, and takes over its ObjectID instead of creating a
+duplicate. The lookup happens at most once per resource: Crossplane persists the resolved id
+as `crossplane.io/external-name`, after which an adopted resource is indistinguishable from
+one this provider created, and no further lookups are made.
+
+It applies to the four kinds whose collections are addressable by name:
+`clickstack.Connection`, `clickstack.Source`, `clickstack.SavedSearch` and
+`clickstack.Dashboard`. `Alert` is keyed by the saved search it evaluates, the v2 webhooks
+endpoint offers no lookup, `/api/v2/team` is a settings singleton, and team members are keyed
+by email — so those keep the create-only behaviour.
+
+Three things are worth knowing before turning it on:
+
+- **It is opt-in for a reason.** With adoption enabled, a name collision means ownership
+  transfer. Enable it on the `ProviderConfig` that manages a pre-existing estate, not
+  globally out of habit.
+- **A failed lookup fails the reconcile.** An unreachable or unauthorised API is *not*
+  treated as "nothing to adopt", because falling through would create the duplicate the
+  feature exists to prevent.
+- **Ambiguity is refused.** ClickStack does not enforce unique names. If two objects share
+  the requested name the resource errors out instead of picking one, since the choice would
+  otherwise depend on API ordering. Set `crossplane.io/external-name` by hand to break the
+  tie.
+
+Combined with `spec.managementPolicies: ["Observe"]`, this is what makes the
+platform-provisioned `clickstack.Connection` usable: observation needs an external name, and
+adoption is how it gets one without a write.
+
 ## Secret handling
 
 Fields the upstream schema marks sensitive are generated as secret references and excluded

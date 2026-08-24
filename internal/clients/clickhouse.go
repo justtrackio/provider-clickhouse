@@ -15,6 +15,7 @@ import (
 
 	clusterv1beta1 "github.com/justtrackio/provider-clickhouse/apis/cluster/v1beta1"
 	namespacedv1beta1 "github.com/justtrackio/provider-clickhouse/apis/namespaced/v1beta1"
+	"github.com/justtrackio/provider-clickhouse/internal/clickstack"
 )
 
 const (
@@ -42,14 +43,19 @@ const (
 // We therefore validate credential *sets* rather than individual keys, and
 // deliberately allow a ProviderConfig that carries only one set.
 const (
-	keyOrganizationID      = "organization_id"
-	keyTokenKey            = "token_key"
-	keyTokenSecret         = "token_secret"
-	keyAPIURL              = "api_url"
-	keyTimeoutSeconds      = "timeout_seconds"
-	keyClickStackAPIKey    = "clickstack_api_key"
-	keyClickStackEndpoint  = "clickstack_endpoint"
-	keyClickStackServiceID = "clickstack_service_id"
+	keyOrganizationID      = clickstack.KeyOrganizationID
+	keyTokenKey            = clickstack.KeyTokenKey
+	keyTokenSecret         = clickstack.KeyTokenSecret
+	keyAPIURL              = clickstack.KeyAPIURL
+	keyTimeoutSeconds      = clickstack.KeyTimeoutSeconds
+	keyClickStackAPIKey    = clickstack.KeyClickStackAPIKey
+	keyClickStackEndpoint  = clickstack.KeyClickStackEndpoint
+	keyClickStackServiceID = clickstack.KeyClickStackServiceID
+
+	// keyAdoptByName is not an upstream provider attribute, so it is routed to
+	// Setup.ClientMetadata instead of the Terraform configuration. See
+	// clickstack.KeyAdoptByName.
+	keyAdoptByName = clickstack.KeyAdoptByName
 )
 
 // cloudCredentialKeys are the ClickHouse Cloud credentials, which are only
@@ -213,9 +219,24 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 			return ps, err
 		}
 		ps.Configuration = config
+		ps.ClientMetadata = buildClientMetadata(creds)
 
 		return ps, nil
 	}
+}
+
+// buildClientMetadata carries the settings that are ours rather than the
+// upstream provider's. Setup.ClientMetadata is upjet's channel for exactly
+// this: values a provider needs for id calculations that are not part of the
+// Terraform provider configuration. Putting keyAdoptByName in Configuration
+// instead would make Terraform reject an unknown provider attribute on every
+// invocation.
+func buildClientMetadata(raw map[string]string) map[string]string {
+	creds := credentials(raw)
+	if !creds.has(keyAdoptByName) {
+		return nil
+	}
+	return map[string]string{keyAdoptByName: creds.get(keyAdoptByName)}
 }
 
 func toSharedPCSpec(pc *clusterv1beta1.ProviderConfig) (*namespacedv1beta1.ProviderConfigSpec, error) {
