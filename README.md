@@ -152,9 +152,9 @@ Set `clickstack_adopt_by_name` in the `ProviderConfig` secret to close that gap:
 
 A resource that has no external name yet then asks the API whether an object of the same
 `forProvider.name` already exists, and takes over its ObjectID instead of creating a
-duplicate. The lookup happens at most once per resource: Crossplane persists the resolved id
-as `crossplane.io/external-name`, after which an adopted resource is indistinguishable from
-one this provider created, and no further lookups are made.
+duplicate. This runs as a Crossplane initializer, before the first observation, and writes
+`crossplane.io/external-name` itself — so the lookup happens exactly once per resource, and
+an adopted resource is thereafter indistinguishable from one this provider created.
 
 It applies to the four kinds whose collections are addressable by name:
 `clickstack.Connection`, `clickstack.Source`, `clickstack.SavedSearch` and
@@ -177,7 +177,11 @@ Three things are worth knowing before turning it on:
 
 Combined with `spec.managementPolicies: ["Observe"]`, this is what makes the
 platform-provisioned `clickstack.Connection` usable: observation needs an external name, and
-adoption is how it gets one without a write.
+adoption is how it gets one without a write. That case is also why adoption is an initializer
+rather than part of the external-name configuration — crossplane-runtime persists a managed
+resource only on the create and late-initialization paths, and an Observe-only resource takes
+neither, so anything that resolved the id later would never get it written down and would
+repeat the lookup on every reconcile.
 
 ## Secret handling
 

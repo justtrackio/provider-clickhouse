@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/crossplane/upjet/v2/pkg/config"
-
-	"github.com/justtrackio/provider-clickhouse/internal/clickstack"
 )
 
 // unusedObjectID is a syntactically valid Mongo ObjectID that no ClickStack
@@ -47,40 +45,13 @@ const unusedObjectID = "000000000000000000000000"
 // Once created, behaviour is identical to IdentifierFromProvider: the external
 // name is read back from the state id, and every later refresh uses the real
 // ObjectID.
-//
-// The collection argument enables the second deviation, name-based adoption.
-// When it is non-empty and the ProviderConfig sets clickstack_adopt_by_name, a
-// resource that has no external name yet first asks the ClickStack API whether
-// an object of that name already exists, and adopts its ObjectID instead of
-// falling through to a create. This exists because ClickStack objects are
-// identified only by their server-assigned ObjectID: there is no name-based
-// lookup upstream, and the documented terraform import syntax is the bare id.
-// Without adoption, pointing a manifest at an estate that was built in the UI
-// duplicates every object it describes. Pass an empty collection for kinds that
-// have no name-addressable collection; they keep the create-only behaviour.
-//
-// A resource that has been adopted is indistinguishable from one that was
-// created here: Terraform refreshes the returned id, upjet reads it back through
-// IDAsExternalName, and Crossplane persists it as crossplane.io/external-name.
-// The lookup therefore happens at most once per resource, and never again once
-// the annotation exists.
-func clickStackIdentifier(collection string) config.ExternalName {
+func clickStackIdentifier() config.ExternalName {
 	e := config.IdentifierFromProvider
 	e.GetIDFn = func(ctx context.Context, externalName string, parameters map[string]any, terraformProviderConfig map[string]any) (string, error) {
-		if externalName != "" {
-			return config.ExternalNameAsID(ctx, externalName, parameters, terraformProviderConfig)
+		if externalName == "" {
+			return unusedObjectID, nil
 		}
-
-		name, _ := parameters["name"].(string)
-		team, _ := parameters["team"].(string)
-		id, err := clickstack.ResolveIDByName(ctx, terraformProviderConfig, collection, name, team)
-		if err != nil {
-			return "", err
-		}
-		if id != "" {
-			return id, nil
-		}
-		return unusedObjectID, nil
+		return config.ExternalNameAsID(ctx, externalName, parameters, terraformProviderConfig)
 	}
 	return e
 }
@@ -183,36 +154,23 @@ var ExternalNameConfigs = map[string]config.ExternalName{
 	// `team` is immutable on these resources upstream - see the
 	// clickstack group configuration where it is marked as forcing
 	// replacement.
-	// Adoptable by name where the collection is name-addressable, so that a
-	// manifest can take ownership of an object that already exists instead of
-	// creating a duplicate. See clickStackIdentifier.
-	//
-	// Alerts and webhooks pass no collection: an alert is keyed by the saved
-	// search it evaluates rather than by a name, and the v2 webhooks endpoint
-	// offers only a paginated list with no GET-by-id.
-	"clickhouse_clickstack_alert":        clickStackIdentifier(""),
-	"clickhouse_clickstack_dashboard":    clickStackIdentifier(clickstack.CollectionDashboards),
-	"clickhouse_clickstack_saved_search": clickStackIdentifier(clickstack.CollectionSavedSearches),
-	"clickhouse_clickstack_source":       clickStackIdentifier(clickstack.CollectionSources),
-	"clickhouse_clickstack_webhook":      clickStackIdentifier(""),
+	"clickhouse_clickstack_alert":        clickStackIdentifier(),
+	"clickhouse_clickstack_dashboard":    clickStackIdentifier(),
+	"clickhouse_clickstack_saved_search": clickStackIdentifier(),
+	"clickhouse_clickstack_source":       clickStackIdentifier(),
+	"clickhouse_clickstack_webhook":      clickStackIdentifier(),
 
 	// Self-hosted ClickStack only. On ClickHouse Cloud, roles/teams/members
 	// are managed through clickhouse_role and clickhouse_role_assignment
 	// instead, and these endpoints return route-not-found.
-	//
-	// None is name-adoptable: /api/v2/team is a settings singleton rather than a
-	// collection, team members are keyed by email, and roles are rarely
-	// pre-existing.
-	"clickhouse_clickstack_role":        clickStackIdentifier(""),
-	"clickhouse_clickstack_team":        clickStackIdentifier(""),
-	"clickhouse_clickstack_team_member": clickStackIdentifier(""),
+	"clickhouse_clickstack_role":        clickStackIdentifier(),
+	"clickhouse_clickstack_team":        clickStackIdentifier(),
+	"clickhouse_clickstack_team_member": clickStackIdentifier(),
 
 	// Read-only in practice: the platform provisions connections, so an
 	// imported connection can be read but not updated or destroyed. Users
-	// should pair this with a management policy of ["Observe"], which needs an
-	// external name to observe - so this is the kind that benefits most from
-	// name-based adoption.
-	"clickhouse_clickstack_connection": clickStackIdentifier(clickstack.CollectionConnections),
+	// should pair this with a management policy of ["Observe"].
+	"clickhouse_clickstack_connection": clickStackIdentifier(),
 }
 
 // ExternalNameConfigured returns the list of all resources whose external name

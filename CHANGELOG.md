@@ -14,7 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   external name resolve its server-assigned ObjectID from `forProvider.name` and adopt the
   existing object, instead of creating a duplicate under a new id. Applies to
   `clickstack.Connection`, `clickstack.Source`, `clickstack.SavedSearch` and
-  `clickstack.Dashboard` — the collections that are addressable by name. A failed lookup
+  `clickstack.Dashboard` — the collections that are addressable by name. Implemented as a
+  managed-resource initializer, so the resolved id is persisted as
+  `crossplane.io/external-name` before the first observation; this is what makes it work for
+  `spec.managementPolicies: ["Observe"]` resources such as `clickstack.Connection`, which
+  crossplane-runtime never writes on the create or late-initialization paths. A failed lookup
   fails the reconcile rather than falling through to a create, and an ambiguous name is
   refused rather than resolved arbitrarily.
 - `CONTRIBUTING.md`, `SECURITY.md`, `CHANGELOG.md` and issue templates.
