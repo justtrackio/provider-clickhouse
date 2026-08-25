@@ -12,8 +12,6 @@ package groups
 
 import (
 	ujconfig "github.com/crossplane/upjet/v2/pkg/config"
-
-	"github.com/justtrackio/provider-clickhouse/internal/clickstack"
 )
 
 // Terraform resource names, kept as constants so a typo becomes a compile
@@ -74,23 +72,6 @@ const (
 // service UUID - exactly what service_id expects.
 func serviceIDRef() ujconfig.Reference {
 	return ujconfig.Reference{TerraformName: resService}
-}
-
-// adoptByName lets a resource take ownership of the ClickStack object that
-// already carries its spec name, instead of creating a second one beside it.
-//
-// Only collections addressable by name can do this. Alerts are keyed by the
-// saved search they evaluate, the v2 webhooks endpoint has no GET-by-id and only
-// a paginated list, /api/v2/team is a settings singleton, and team members are
-// keyed by email - so those kinds get no adopter and keep creating.
-//
-// It is wired as an initializer rather than through ExternalName: the annotation
-// has to be persisted before the first Observe, and crossplane-runtime only
-// writes the managed resource on the create and late-initialization paths,
-// neither of which runs for an adopted or Observe-only resource. See
-// clickstack.Adopter.
-func adoptByName(r *ujconfig.Resource, collection string) {
-	r.InitializerFns = append(r.InitializerFns, clickstack.AdoptByName(collection))
 }
 
 // Configure registers all resource configurators for this provider.
@@ -228,10 +209,7 @@ func configureClickStack(p *ujconfig.Provider) {
 		r.Kind = "Connection"
 		// Connections are provisioned by the platform and cannot be
 		// updated or destroyed through the API. Users should manage
-		// these with spec.managementPolicies: ["Observe"], which needs an
-		// external name to observe - so this is the kind that depends most on
-		// being able to adopt by name.
-		adoptByName(r, clickstack.CollectionConnections)
+		// these with spec.managementPolicies: ["Observe"].
 	})
 
 	p.AddResourceConfigurator(resCSSource, func(r *ujconfig.Resource) {
@@ -239,7 +217,6 @@ func configureClickStack(p *ujconfig.Provider) {
 		r.Kind = "Source"
 		r.References["connection_id"] = ujconfig.Reference{TerraformName: resCSConnection}
 		r.References["team"] = teamRef()
-		adoptByName(r, clickstack.CollectionSources)
 		// The peer links (log/trace/metric/session_source_id) are deliberately
 		// not references, and are ignored by the late-initializer.
 		//
@@ -271,7 +248,6 @@ func configureClickStack(p *ujconfig.Provider) {
 		r.Kind = "SavedSearch"
 		r.References["source_id"] = ujconfig.Reference{TerraformName: resCSSource}
 		r.References["team"] = teamRef()
-		adoptByName(r, clickstack.CollectionSavedSearches)
 	})
 
 	p.AddResourceConfigurator(resCSAlert, func(r *ujconfig.Resource) {
@@ -290,7 +266,6 @@ func configureClickStack(p *ujconfig.Provider) {
 		r.ShortGroup = groupClickStack
 		r.Kind = "Dashboard"
 		r.References["team"] = teamRef()
-		adoptByName(r, clickstack.CollectionDashboards)
 	})
 
 	p.AddResourceConfigurator(resCSWebhook, func(r *ujconfig.Resource) {

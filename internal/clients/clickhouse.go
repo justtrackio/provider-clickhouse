@@ -15,7 +15,6 @@ import (
 
 	clusterv1beta1 "github.com/justtrackio/provider-clickhouse/apis/cluster/v1beta1"
 	namespacedv1beta1 "github.com/justtrackio/provider-clickhouse/apis/namespaced/v1beta1"
-	"github.com/justtrackio/provider-clickhouse/internal/clickstack"
 )
 
 const (
@@ -43,14 +42,14 @@ const (
 // We therefore validate credential *sets* rather than individual keys, and
 // deliberately allow a ProviderConfig that carries only one set.
 const (
-	keyOrganizationID      = clickstack.KeyOrganizationID
-	keyTokenKey            = clickstack.KeyTokenKey
-	keyTokenSecret         = clickstack.KeyTokenSecret
-	keyAPIURL              = clickstack.KeyAPIURL
-	keyTimeoutSeconds      = clickstack.KeyTimeoutSeconds
-	keyClickStackAPIKey    = clickstack.KeyClickStackAPIKey
-	keyClickStackEndpoint  = clickstack.KeyClickStackEndpoint
-	keyClickStackServiceID = clickstack.KeyClickStackServiceID
+	keyOrganizationID      = "organization_id"
+	keyTokenKey            = "token_key"
+	keyTokenSecret         = "token_secret"
+	keyAPIURL              = "api_url"
+	keyTimeoutSeconds      = "timeout_seconds"
+	keyClickStackAPIKey    = "clickstack_api_key"
+	keyClickStackEndpoint  = "clickstack_endpoint"
+	keyClickStackServiceID = "clickstack_service_id"
 )
 
 // cloudCredentialKeys are the ClickHouse Cloud credentials, which are only
